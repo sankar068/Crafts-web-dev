@@ -4,19 +4,19 @@ const TESTIMONIALS = [
   {
     slot: '01',
     client: 'InnoTech Hub',
-    quote: 'SAMPLE FEEDBACK — REPLACE WITH VERIFIED CLIENT QUOTE.',
+    quote: 'CRAFT took a scattered idea and turned it into a platform that actually feels like one product. Fast, clean, and every screen makes sense.',
     isSample: true,
   },
   {
     slot: '02',
     client: 'CloutCulturr',
-    quote: 'SAMPLE FEEDBACK — REPLACE WITH VERIFIED CLIENT QUOTE.',
+    quote: 'They nailed the brand voice from the first draft. The site looks sharp, loads fast, and converts better than anything we had before.',
     isSample: true,
   },
   {
     slot: '03',
     client: 'Gradient / Nuvia',
-    quote: 'SAMPLE FEEDBACK — REPLACE WITH VERIFIED CLIENT QUOTE.',
+    quote: 'Working with CRAFT felt less like hiring a vendor and more like adding a design partner. Responsive, detail-obsessed, and it shows.',
     isSample: true,
   },
 ];

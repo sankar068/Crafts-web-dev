@@ -6,25 +6,43 @@ import { ArrowUpRight } from 'lucide-react';
 export default function CtaSection({ onStartProject }: { onStartProject: () => void }) {
   const ref = useReveal<HTMLDivElement>();
   const bgRef = useRef<HTMLDivElement>(null);
+  const revealRef = useRef<HTMLDivElement>(null);
 
   const handleMove = (e: React.MouseEvent) => {
     const el = bgRef.current;
-    if (!el) return;
+    const reveal = revealRef.current;
+    if (!el || !reveal) return;
     const rect = el.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     el.style.background = `radial-gradient(ellipse 50% 50% at ${x}% ${y}%, rgba(59,91,255,0.15), transparent 70%)`;
+
+    const mask = `radial-gradient(circle 260px at ${x}% ${y}%, black 0%, rgba(0,0,0,0.6) 45%, transparent 100%)`;
+    reveal.style.webkitMaskImage = mask;
+    reveal.style.maskImage = mask;
+    reveal.style.opacity = '1';
   };
 
   const handleLeave = () => {
     const el = bgRef.current;
-    if (!el) return;
-    el.style.background = 'transparent';
+    const reveal = revealRef.current;
+    if (el) el.style.background = 'transparent';
+    if (reveal) reveal.style.opacity = '0';
   };
 
   return (
     <section className="relative py-30 md:py-40 border-t border-line overflow-hidden" onMouseMove={handleMove} onMouseLeave={handleLeave}>
       <div ref={bgRef} className="absolute inset-0 transition-all duration-300" />
+      <div
+        ref={revealRef}
+        className="absolute inset-0 opacity-0 transition-opacity duration-300 pointer-events-none"
+        style={{
+          backgroundImage: 'url(/assets/images/crafts-logo-faded.png)',
+          backgroundSize: 'contain',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      />
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="w-[40rem] h-[40rem] rounded-full bg-cobalt/[0.04] blur-3xl" />
       </div>

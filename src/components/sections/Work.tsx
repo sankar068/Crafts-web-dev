@@ -33,7 +33,7 @@ const PROJECTS: Project[] = [
     experience: 'Scroll-driven section reveals and contextual micro-interactions guide users through the ecosystem without overwhelming first-time visitors.',
     seo: 'Semantic HTML structure, per-page metadata, and structured data for courses and institutions to maximize discoverability in search.',
     outcome: 'A cohesive platform experience that scales across audiences while maintaining a single, recognizable brand presence.',
-    liveUrl: '#',
+    liveUrl: 'https://innotechhub.in',
   },
   {
     num: '02',
@@ -48,7 +48,7 @@ const PROJECTS: Project[] = [
     experience: 'Motion and interaction reinforce the brand voice — every hover, transition and scroll moment feels intentional and on-brand.',
     seo: 'Technical foundations ensure the visually-rich experience remains crawlable and indexable, with clean content structure beneath the design layer.',
     outcome: 'A brand experience that communicates personality instantly and converts visitors into engaged community members.',
-    liveUrl: '#',
+    liveUrl: 'https://cloutculturr.in',
   },
   {
     num: '03',
@@ -63,7 +63,7 @@ const PROJECTS: Project[] = [
     experience: 'Interactive event cards and community highlights create a sense of ongoing activity that encourages repeat visits.',
     seo: 'Structured data for events and organization information helps the community appear in relevant local and academic searches.',
     outcome: 'A living community platform that reflects the energy of the club and makes participation feel effortless.',
-    liveUrl: '#',
+    liveUrl: 'https://nextgen-ai-tau.vercel.app/',
   },
   {
     num: '04',
@@ -78,7 +78,7 @@ const PROJECTS: Project[] = [
     experience: 'Subtle motion and technical visual details create a premium feel that elevates the club above a typical student organization page.',
     seo: 'Optimized for local and institutional discovery, with clean semantic structure supporting both search and accessibility.',
     outcome: 'A digital presence that positions the club as a serious tech community and attracts new members and collaborators.',
-    liveUrl: '#',
+    liveUrl: 'https://gradientclub.in',
   },
 ];
 
