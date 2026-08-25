@@ -1,4 +1,4 @@
-import { Linkedin, Instagram, Mail } from 'lucide-react';
+import { Instagram, Mail } from 'lucide-react';
 
 const NAV = [
   { label: 'Work', href: '#work' },
@@ -8,9 +8,8 @@ const NAV = [
 ];
 
 const SOCIALS = [
-  { label: 'LinkedIn', href: 'https://www.linkedin.com', icon: Linkedin },
-  { label: 'Instagram', href: 'https://www.instagram.com', icon: Instagram },
-  { label: 'Email', href: 'mailto:hello@craft.studio', icon: Mail },
+  { label: 'Instagram', href: 'https://www.instagram.com/weare.crafts/', icon: Instagram },
+  { label: 'Email', href: 'mailto:hellowearecraft@gmail.com', icon: Mail },
 ];
 
 export default function Footer() {
