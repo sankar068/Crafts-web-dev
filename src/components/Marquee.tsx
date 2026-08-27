@@ -1,4 +1,4 @@
-const CLIENTS = ['InnoTech Hub', 'CloutCulturr', 'Nuvia Technical Club', 'Gradient Club'];
+const CLIENTS = ['InnoTech Hub', 'CloutCulturr'];
 
 export default function Marquee() {
   const items = [...CLIENTS, ...CLIENTS, ...CLIENTS, ...CLIENTS];

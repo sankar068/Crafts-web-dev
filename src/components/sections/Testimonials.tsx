@@ -13,12 +13,6 @@ const TESTIMONIALS = [
     quote: 'They nailed the brand voice from the first draft. The site looks sharp, loads fast, and converts better than anything we had before.',
     isSample: true,
   },
-  {
-    slot: '03',
-    client: 'Gradient / Nuvia',
-    quote: 'Working with CRAFT felt less like hiring a vendor and more like adding a design partner. Responsive, detail-obsessed, and it shows.',
-    isSample: true,
-  },
 ];
 
 export default function Testimonials() {

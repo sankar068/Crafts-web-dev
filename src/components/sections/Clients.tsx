@@ -1,6 +1,6 @@
 import { useReveal } from '@/lib/useReveal';
 
-const CLIENTS = ['InnoTech Hub', 'CloutCulturr', 'Nuvia Technical Club', 'Gradient Club'];
+const CLIENTS = ['InnoTech Hub', 'CloutCulturr'];
 
 export default function Clients() {
   const ref = useReveal<HTMLDivElement>();
@@ -17,7 +17,7 @@ export default function Clients() {
           </h2>
         </div>
 
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-px bg-line rounded-2xl overflow-hidden">
+        <div className="mt-16 grid grid-cols-2 gap-px bg-line rounded-2xl overflow-hidden">
           {CLIENTS.map((client) => (
             <div
               key={client}
