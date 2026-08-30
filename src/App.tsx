@@ -21,8 +21,19 @@ export default function App() {
 
   // Lock scroll until main site is shown
   useEffect(() => {
-    document.body.style.overflow = phase === 'site' ? '' : 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    if (phase === 'site') {
+      // Remove inline overflow style so CSS takes over (no overflow:hidden)
+      document.body.style.removeProperty('overflow');
+      document.documentElement.style.removeProperty('overflow');
+    } else {
+      // Lock scroll during overlay
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    }
+    return () => {
+      document.body.style.removeProperty('overflow');
+      document.documentElement.style.removeProperty('overflow');
+    };
   }, [phase]);
 
   // Called by Home the moment countdown hits zero
