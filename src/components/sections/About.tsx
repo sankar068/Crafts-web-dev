@@ -18,7 +18,7 @@ export default function About() {
             <p className="text-lg md:text-xl text-bone-dim leading-relaxed">
               CRAFT was built around a simple idea: digital work should feel as good as it functions.
               We combine design thinking, technology and strategy to create digital experiences that
-              help organizations communicate better, look sharper and grow online. Founded in 2025.
+              help organizations communicate better, look sharper and grow online. Founded in 2026.
             </p>
 
             <div className="mt-12 grid sm:grid-cols-2 gap-px bg-line rounded-2xl overflow-hidden">

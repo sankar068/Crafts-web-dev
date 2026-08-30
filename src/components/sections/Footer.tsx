@@ -33,7 +33,7 @@ export default function Footer() {
               <span className="w-2 h-2 rounded-full bg-cobalt" />
               CRAFT
             </button>
-            <p className="mt-4 text-sm text-muted">Since 2025</p>
+            <p className="mt-4 text-sm text-muted">Since 2026</p>
             <p className="mt-2 text-sm text-bone-dim max-w-xs">
               Creative Research & Advanced Frameworks for Technology.
             </p>
