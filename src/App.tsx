@@ -14,8 +14,10 @@ const MainSite = lazy(() => import('@/components/MainSite'));
 type Phase = 'overlay' | 'fading' | 'site';
 
 export default function App() {
-  const [phase, setPhase] = useState<Phase>('overlay');
-  const [siteVisible, setSiteVisible] = useState(false);
+  // Dev bypass: ?skip-launch in URL skips directly to main site
+  const skipLaunch = new URLSearchParams(window.location.search).has('skip-launch');
+  const [phase, setPhase] = useState<Phase>(skipLaunch ? 'site' : 'overlay');
+  const [siteVisible, setSiteVisible] = useState(skipLaunch);
 
   // Lock scroll until main site is shown
   useEffect(() => {
