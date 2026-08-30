@@ -13,8 +13,9 @@ type TimeLeft = {
   total: number;
 };
 
-// 30 seconds launch preview timer
-const COUNTDOWN_SECONDS = 30;
+// Target launch time: 30 August 2026, 11:11:11 PM IST (UTC+05:30)
+export const LAUNCH_DATE_ISO = '2026-08-30T23:11:11+05:30';
+export const TARGET_LAUNCH_TIME = new Date(LAUNCH_DATE_ISO).getTime();
 
 function getTimeLeft(targetTime: number): TimeLeft {
   const total = Math.max(0, targetTime - Date.now());
@@ -112,8 +113,8 @@ interface HomeProps {
 }
 
 export default function Home({ onLaunched }: HomeProps) {
-  const [targetTime] = useState(() => Date.now() + COUNTDOWN_SECONDS * 1000);
-  const [live, setLive] = useState(false);
+  const targetTime = TARGET_LAUNCH_TIME;
+  const [live, setLive] = useState(() => Date.now() >= TARGET_LAUNCH_TIME);
   const calledRef = useRef(false);
   const pageRef = useRef<HTMLDivElement>(null);
 
@@ -186,7 +187,7 @@ export default function Home({ onLaunched }: HomeProps) {
             <span>Built for the next signal</span>
           </div>
           <p className="launch-date">
-            31 August 2026 <span>·</span> 11:11:11 PM IST
+            30 August 2026 <span>·</span> 11:11:11 PM IST
           </p>
           <SocialLinks />
         </footer>

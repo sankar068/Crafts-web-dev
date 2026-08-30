@@ -26,10 +26,10 @@ export default function LaunchCountdown({ onLaunchMoment }: LaunchCountdownProps
 
   useEffect(() => {
     const calculateCountdown = () => {
-      // Target launch time: 31 August 2026, 11:11:11 PM IST
+      // Target launch time: 30 August 2026, 11:11:11 PM IST
       // IST is UTC+05:30
       // Using a fixed timestamp that represents this moment
-      const targetDate = new Date('2026-08-31T23:11:11+05:30').getTime();
+      const targetDate = new Date('2026-08-30T23:11:11+05:30').getTime();
       const now = new Date().getTime();
       const difference = targetDate - now;
 
