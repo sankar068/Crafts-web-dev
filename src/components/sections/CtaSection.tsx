@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { useReveal } from '@/lib/useReveal';
 import Magnetic from '@/components/Magnetic';
+import MaskedHeading from '@/components/MaskedHeading';
 import { ArrowUpRight } from 'lucide-react';
 
 export default function CtaSection({ onStartProject }: { onStartProject: () => void }) {
@@ -48,10 +49,23 @@ export default function CtaSection({ onStartProject }: { onStartProject: () => v
       </div>
 
       <div ref={ref} className="reveal-up relative z-10 mx-auto max-w-5xl px-5 md:px-8 text-center">
-        <h2 className="font-display text-[clamp(2.5rem,8vw,7rem)] font-bold leading-[0.98] tracking-tightest text-bone">
-          HAVE SOMETHING<br />
-          <span className="text-bone-dim">WORTH CRAFTING?</span>
-        </h2>
+        <MaskedHeading
+          text="HAVE SOMETHING WORTH CRAFTING?"
+          tag="h2"
+          mediaType="image"
+          src="/assets/images/crafts-logo.png"
+          fillScale={1.3}
+          parallax={34}
+          reveal="wipe"
+          trigger="view"
+          duration={1.2}
+          align="center"
+          weight={700}
+          tracking={-0.04}
+          lineHeight={0.98}
+          textScale={0.08}
+          className="font-display"
+        />
 
         <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Magnetic strength={0.2}>

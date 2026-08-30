@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useId, useMemo, useRef } from 'react';
 import { gsap } from 'gsap';
+import './MaskedHeading.css';
 
 const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
 
-type MaskedHeadingProps = {
+interface MaskedHeadingProps {
   text?: string;
-  tag?: 'h1' | 'h2' | 'h3';
+  tag?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
   mediaType?: 'image' | 'video';
   src?: string;
   poster?: string;
@@ -18,7 +19,7 @@ type MaskedHeadingProps = {
   reveal?: 'rise' | 'wipe' | 'fade' | 'none';
   duration?: number;
   stagger?: number;
-  trigger?: 'view' | 'hover' | 'load';
+  trigger?: 'view' | 'mount' | 'hover';
   align?: 'left' | 'center' | 'right';
   weight?: number;
   tracking?: number;
@@ -26,9 +27,9 @@ type MaskedHeadingProps = {
   textScale?: number;
   className?: string;
   style?: React.CSSProperties;
-};
+}
 
-export default function MaskedHeading({
+const MaskedHeading = ({
   text = 'Designed in the details',
   tag = 'h2',
   mediaType = 'image',
@@ -51,31 +52,44 @@ export default function MaskedHeading({
   textScale = 0.115,
   className = '',
   style,
-}: MaskedHeadingProps) {
+  ...rest
+}: MaskedHeadingProps) => {
   const rootRef = useRef<HTMLElement>(null);
   const measureRef = useRef<HTMLSpanElement>(null);
   const revealRef = useRef<HTMLSpanElement>(null);
   const mediaRef = useRef<HTMLSpanElement>(null);
   const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const baseRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const baseRefs = useRef<(HTMLElement | null)[]>([]);
   const glyphRefs = useRef<(SVGTextElement | null)[]>([]);
-  const tweenRef = useRef<gsap.core.Tween | null>(null);
+  const tweenRef = useRef<gsap.core.Tween | gsap.core.Timeline | null>(null);
   const offsetRef = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
   const clipId = `mh-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
+
   const words = useMemo(() => String(text).split(/\s+/).filter(Boolean), [text]);
-  const settingsRef = useRef({ fillScale, parallax, drift, brightness, saturation, grayscale, textScale });
+
+  const settingsRef = useRef({
+    fillScale,
+    parallax,
+    drift,
+    brightness,
+    saturation,
+    grayscale,
+    textScale,
+  });
   settingsRef.current = { fillScale, parallax, drift, brightness, saturation, grayscale, textScale };
 
   const place = useCallback(() => {
     const root = rootRef.current;
     const media = mediaRef.current;
     if (!root || !media) return;
+
     const s = settingsRef.current;
     const W = root.clientWidth;
     const H = root.clientHeight;
     const off = offsetRef.current;
     const maxX = Math.max(0, ((s.fillScale - 1) / 2) * W);
     const maxY = Math.max(0, ((s.fillScale - 1) / 2) * H);
+
     media.style.transform = `translate3d(${clamp(off.x, -maxX, maxX).toFixed(2)}px, ${clamp(off.y, -maxY, maxY).toFixed(2)}px, 0) scale(${s.fillScale})`;
     media.style.filter = `brightness(${s.brightness}) saturate(${s.saturation})${s.grayscale ? ' grayscale(1)' : ''}`;
   }, []);
@@ -84,14 +98,18 @@ export default function MaskedHeading({
     const root = rootRef.current;
     const measure = measureRef.current;
     if (!root || !measure) return;
+
     const s = settingsRef.current;
     root.style.fontSize = `${clamp(root.clientWidth * s.textScale, 20, 200).toFixed(1)}px`;
+
     const cs = window.getComputedStyle(measure);
+
     for (let i = 0; i < wordRefs.current.length; i += 1) {
       const box = wordRefs.current[i];
       const base = baseRefs.current[i];
       const glyph = glyphRefs.current[i];
-      if (!box || !base || !glyph || !root) continue;
+      if (!box || !base || !glyph) continue;
+
       glyph.setAttribute('x', `${box.offsetLeft}`);
       glyph.setAttribute('y', `${base.offsetTop}`);
       glyph.style.fontFamily = cs.fontFamily;
@@ -100,49 +118,66 @@ export default function MaskedHeading({
       glyph.style.fontStyle = cs.fontStyle;
       glyph.style.letterSpacing = cs.letterSpacing;
     }
+
     place();
   }, [place]);
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
+
     sync();
+
     const ro = new ResizeObserver(sync);
     ro.observe(root);
+
     if (document.fonts?.ready) document.fonts.ready.then(sync).catch(() => {});
+
     let raf = 0;
     let last = performance.now();
     let clock = 0;
+
     const frame = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       clock += dt;
+
       const s = settingsRef.current;
       const off = offsetRef.current;
+
       const dx = Math.sin(clock * 0.21) * s.drift;
       const dy = Math.cos(clock * 0.17) * s.drift * 0.6;
+
       const ease = 1 - Math.exp(-dt / 0.18);
       off.x += (off.tx + dx - off.x) * ease;
       off.y += (off.ty + dy - off.y) * ease;
+
       place();
       raf = requestAnimationFrame(frame);
     };
+
     const onMove = (e: PointerEvent) => {
       const s = settingsRef.current;
       if (s.parallax <= 0) return;
+
       const r = root.getBoundingClientRect();
       const nx = ((e.clientX - r.left) / (r.width || 1)) * 2 - 1;
       const ny = ((e.clientY - r.top) / (r.height || 1)) * 2 - 1;
+
       offsetRef.current.tx = clamp(nx, -1, 1) * -s.parallax;
       offsetRef.current.ty = clamp(ny, -1, 1) * -s.parallax;
     };
+
     const onLeave = () => {
       offsetRef.current.tx = 0;
       offsetRef.current.ty = 0;
     };
+
     root.addEventListener('pointermove', onMove);
     root.addEventListener('pointerleave', onLeave);
+
     raf = requestAnimationFrame(frame);
+
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
@@ -159,13 +194,17 @@ export default function MaskedHeading({
     const root = rootRef.current;
     const layer = revealRef.current;
     if (!root || !layer) return;
+
     const glyphs = glyphRefs.current.filter(Boolean) as SVGTextElement[];
     if (!glyphs.length) return;
+
     const riseDistance = () => (parseFloat(window.getComputedStyle(root).fontSize) || 48) * 1.15;
+
     const settle = () => {
       gsap.set(glyphs, { y: 0 });
       gsap.set(layer, { opacity: 1, scale: 1, clipPath: 'inset(0% 0% 0% 0%)' });
     };
+
     const rest = () => {
       if (reveal === 'rise') {
         gsap.set(glyphs, { y: riseDistance() });
@@ -175,13 +214,17 @@ export default function MaskedHeading({
         gsap.set(layer, { opacity: 0, scale: 1.08 });
       }
     };
+
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     if (reveal === 'none' || reduce) {
       settle();
       return;
     }
+
     const play = () => {
       tweenRef.current?.kill();
+
       if (reveal === 'rise') {
         gsap.set(layer, { opacity: 1, scale: 1, clipPath: 'inset(0% 0% 0% 0%)' });
         tweenRef.current = gsap.fromTo(
@@ -210,6 +253,7 @@ export default function MaskedHeading({
         );
       }
     };
+
     if (trigger === 'hover') {
       settle();
       root.addEventListener('pointerenter', play);
@@ -218,6 +262,7 @@ export default function MaskedHeading({
         tweenRef.current?.kill();
       };
     }
+
     if (trigger === 'view') {
       settle();
       rest();
@@ -236,26 +281,42 @@ export default function MaskedHeading({
         tweenRef.current?.kill();
       };
     }
+
     play();
     return () => tweenRef.current?.kill();
   }, [reveal, trigger, duration, stagger, words]);
 
   const Tag = tag;
+
   return (
     <Tag
-      ref={rootRef as React.RefObject<HTMLHeadingElement>}
+      ref={rootRef as any}
       className={`masked-heading ${className}`.trim()}
-      style={{ textAlign: align, fontWeight: weight, letterSpacing: `${tracking}em`, lineHeight, ...style }}
+      style={{
+        textAlign: align,
+        fontWeight: weight,
+        letterSpacing: `${tracking}em`,
+        lineHeight,
+        ...style,
+      }}
+      {...rest}
     >
       <span ref={measureRef} className="masked-heading__measure">
         {words.map((word, i) => (
           <span
             key={`${word}-${i}`}
-            ref={(el) => { wordRefs.current[i] = el; }}
+            ref={(el) => {
+              wordRefs.current[i] = el;
+            }}
             className="masked-heading__word"
           >
             {word}
-            <i ref={(el) => { baseRefs.current[i] = el; }} className="masked-heading__baseline" />
+            <i
+              ref={(el) => {
+                baseRefs.current[i] = el;
+              }}
+              className="masked-heading__baseline"
+            />
           </span>
         ))}
       </span>
@@ -263,7 +324,14 @@ export default function MaskedHeading({
         <defs>
           <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
             {words.map((word, i) => (
-              <text key={`${word}-${i}`} ref={(el) => { glyphRefs.current[i] = el; }}>{word}</text>
+              <text
+                key={`${word}-${i}`}
+                ref={(el) => {
+                  glyphRefs.current[i] = el;
+                }}
+              >
+                {word}
+              </text>
             ))}
           </clipPath>
         </defs>
@@ -281,4 +349,6 @@ export default function MaskedHeading({
       </span>
     </Tag>
   );
-}
+};
+
+export default MaskedHeading;
