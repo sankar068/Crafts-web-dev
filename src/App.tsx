@@ -1,52 +1,81 @@
-import { useCallback } from 'react';
-import Cursor from '@/components/Cursor';
-import Navigation from '@/components/sections/Navigation';
-import Hero from '@/components/sections/Hero';
-import ScrollIntro from '@/components/sections/ScrollIntro';
-import Philosophy from '@/components/sections/Philosophy';
-import Services from '@/components/sections/Services';
-import Work from '@/components/sections/Work';
-import Marquee from '@/components/Marquee';
-import Clients from '@/components/sections/Clients';
-import Testimonials from '@/components/sections/Testimonials';
-import SeoSection from '@/components/sections/SeoSection';
-import Performance from '@/components/sections/Performance';
-import Process from '@/components/sections/Process';
-import WhyCraft from '@/components/sections/WhyCraft';
-import About from '@/components/sections/About';
-import CtaSection from '@/components/sections/CtaSection';
-import Contact from '@/components/sections/Contact';
-import Footer from '@/components/sections/Footer';
+/*
+ * CRAFT / Nocturne Signal
+ * Phase flow:
+ *   "overlay" → only launch page in DOM, main site not mounted
+ *   "fading"  → launch page fading out (1.2s), main site still not mounted
+ *   "site"    → launch page removed, main site mounts + fades in cleanly
+ */
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import Home from '@/pages/Home';
+
+const MainSite = lazy(() => import('@/components/MainSite'));
+
+type Phase = 'overlay' | 'fading' | 'site';
 
 export default function App() {
-  const scrollToContact = useCallback(() => {
-    document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' });
+  const [phase, setPhase] = useState<Phase>('overlay');
+  const [siteVisible, setSiteVisible] = useState(false);
+
+  // Lock scroll until main site is shown
+  useEffect(() => {
+    document.body.style.overflow = phase === 'site' ? '' : 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, [phase]);
+
+  // Called by Home the moment countdown hits zero
+  const handleLaunched = useCallback(() => {
+    // Show "We're live." for 2s then fade overlay out
+    setTimeout(() => {
+      setPhase('fading');
+      // Remove overlay after fade, then mount main site
+      setTimeout(() => {
+        setPhase('site');
+      }, 1200);
+    }, 2000);
   }, []);
 
+  // After site mounts, fade it in on the next paint — single rAF, no double
+  useEffect(() => {
+    if (phase === 'site') {
+      const raf = requestAnimationFrame(() => setSiteVisible(true));
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [phase]);
+
   return (
-    <div className="grain relative min-h-screen bg-bg">
-      <Cursor />
-      <Navigation onStartProject={scrollToContact} />
+    <ErrorBoundary>
 
-      <main>
-        <Hero />
-        <ScrollIntro />
-        <Philosophy />
-        <Services />
-        <Work />
-        <Marquee />
-        <Clients />
-        <Testimonials />
-        <SeoSection />
-        <Performance />
-        <Process />
-        <WhyCraft />
-        <About />
-        <CtaSection onStartProject={scrollToContact} />
-        <Contact />
-      </main>
+      {/* ── Main site — only mounted after overlay fully gone ── */}
+      {phase === 'site' && (
+        <div style={{
+          opacity: siteVisible ? 1 : 0,
+          transition: 'opacity 0.9s cubic-bezier(0.23, 1, 0.32, 1)',
+        }}>
+          <ErrorBoundary>
+            <Suspense fallback={null}>
+              <MainSite />
+            </Suspense>
+          </ErrorBoundary>
+        </div>
+      )}
 
-      <Footer />
-    </div>
+      {/* ── Launch overlay — only rendered during overlay + fading phases ── */}
+      {phase !== 'site' && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9999,
+          opacity: phase === 'fading' ? 0 : 1,
+          transition: phase === 'fading'
+            ? 'opacity 1.2s cubic-bezier(0.23, 1, 0.32, 1)'
+            : 'none',
+          pointerEvents: phase === 'fading' ? 'none' : 'auto',
+        }}>
+          <Home onLaunched={handleLaunched} />
+        </div>
+      )}
+
+    </ErrorBoundary>
   );
 }

@@ -22,7 +22,8 @@ export default function Cursor() {
       dot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
     };
 
-    const onOver = (e: MouseEvent) => {
+    // Use pointermove instead of mouseover — fires once per move, no DOM bubbling storm
+    const onPointerMove = (e: PointerEvent) => {
       const target = e.target as HTMLElement;
       if (target.closest('a, button, [role="button"], input, textarea, select, label')) {
         ring.style.width = '56px';
@@ -43,12 +44,12 @@ export default function Cursor() {
     };
 
     window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseover', onOver);
+    window.addEventListener('pointermove', onPointerMove);
     raf = requestAnimationFrame(loop);
 
     return () => {
       window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseover', onOver);
+      window.removeEventListener('pointermove', onPointerMove);
       cancelAnimationFrame(raf);
     };
   }, []);

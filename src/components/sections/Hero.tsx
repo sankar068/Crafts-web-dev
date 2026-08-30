@@ -15,19 +15,22 @@ export default function Hero() {
 
     let w = 0;
     let h = 0;
-    let dpr = window.devicePixelRatio || 1;
+    const dpr = window.devicePixelRatio || 1;
 
     const resize = () => {
       w = canvas.offsetWidth;
       h = canvas.offsetHeight;
+      // Reset transform before re-scaling to prevent accumulation on resize
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       canvas.width = w * dpr;
       canvas.height = h * dpr;
       ctx.scale(dpr, dpr);
     };
     resize();
 
+    // Reduced particle count for performance
     const particles: { x: number; y: number; vx: number; vy: number; r: number; a: number }[] = [];
-    const count = Math.min(80, Math.floor((w * h) / 18000));
+    const count = Math.min(50, Math.floor((w * h) / 24000));
     for (let i = 0; i < count; i++) {
       particles.push({
         x: Math.random() * w,
@@ -48,41 +51,49 @@ export default function Hero() {
     };
     window.addEventListener('mousemove', onMove);
 
+    // Pre-compute connection threshold squared to avoid sqrt in the hot loop
+    const CONNECT_DIST_SQ = 120 * 120;
+    const MOUSE_DIST_SQ = 140 * 140;
+
     let raf = 0;
     const draw = () => {
       ctx.clearRect(0, 0, w, h);
 
-      particles.forEach((p) => {
+      // O(n) particle update + draw
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
         p.x += p.vx;
         p.y += p.vy;
         if (p.x < 0 || p.x > w) p.vx *= -1;
         if (p.y < 0 || p.y > h) p.vy *= -1;
 
-        const dx = mouseX - p.x;
-        const dy = mouseY - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 140) {
-          p.x -= dx * 0.008;
-          p.y -= dy * 0.008;
+        const mdx = mouseX - p.x;
+        const mdy = mouseY - p.y;
+        if (mdx * mdx + mdy * mdy < MOUSE_DIST_SQ) {
+          p.x -= mdx * 0.008;
+          p.y -= mdy * 0.008;
         }
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(59, 91, 255, ${p.a})`;
+        ctx.fillStyle = `rgba(59,91,255,${p.a})`;
         ctx.fill();
-      });
+      }
 
+      // O(n²) connections — optimised: use squared distance, skip sqrt entirely
+      ctx.lineWidth = 0.5;
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
+          const distSq = dx * dx + dy * dy;
+          if (distSq < CONNECT_DIST_SQ) {
+            // Approximate alpha without sqrt: use distSq ratio
+            const alpha = 0.12 * (1 - distSq / CONNECT_DIST_SQ);
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(59, 91, 255, ${0.12 * (1 - dist / 120)})`;
-            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = `rgba(59,91,255,${alpha.toFixed(3)})`;
             ctx.stroke();
           }
         }
@@ -92,13 +103,12 @@ export default function Hero() {
     };
     draw();
 
-    const onResize = () => resize();
-    window.addEventListener('resize', onResize);
+    window.addEventListener('resize', resize);
 
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('resize', onResize);
+      window.removeEventListener('resize', resize);
     };
   }, []);
 
@@ -175,25 +185,23 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.8 }}
           className="mt-10 flex items-center gap-6 text-sm text-muted"
         >
-          <span>Est. 2025</span>
+          <span>Est. 2026</span>
           <span className="w-1 h-1 rounded-full bg-muted" />
           <span>Web Design · Development · UI/UX · SEO</span>
         </motion.div>
       </div>
 
+      {/* Scroll indicator — simple CSS animation, no Framer repeat:Infinity */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
+        transition={{ delay: 1.2, duration: 0.6 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted"
       >
         <span className="text-xs tracking-widest uppercase">Scroll</span>
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-        >
+        <div className="hero-scroll-arrow">
           <ArrowDown size={16} />
-        </motion.div>
+        </div>
       </motion.div>
     </section>
   );

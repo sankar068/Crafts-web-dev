@@ -49,43 +49,70 @@ export default function ScrollReveal({
     const scroller =
       scrollContainerRef && scrollContainerRef.current ? scrollContainerRef.current : window;
 
-    gsap.fromTo(
+    // Collect only THIS instance's triggers — never kill globally
+    const triggers: ScrollTrigger[] = [];
+
+    const rotTween = gsap.fromTo(
       el,
       { transformOrigin: '0% 50%', rotate: baseRotation },
       {
         ease: 'none',
         rotate: 0,
-        scrollTrigger: { trigger: el, scroller, start: 'top bottom', end: rotationEnd, scrub: true },
+        scrollTrigger: {
+          trigger: el,
+          scroller,
+          start: 'top bottom',
+          end: rotationEnd,
+          scrub: true,
+          onToggle: (self) => { if (!triggers.includes(self)) triggers.push(self); },
+        },
       }
     );
+    if (rotTween.scrollTrigger) triggers.push(rotTween.scrollTrigger);
 
     const wordElements = el.querySelectorAll('.word');
-    gsap.fromTo(
+
+    const opacityTween = gsap.fromTo(
       wordElements,
       { opacity: baseOpacity, willChange: 'opacity' },
       {
         ease: 'none',
         opacity: 1,
         stagger: 0.05,
-        scrollTrigger: { trigger: el, scroller, start: 'top bottom-=20%', end: wordAnimationEnd, scrub: true },
+        scrollTrigger: {
+          trigger: el,
+          scroller,
+          start: 'top bottom-=20%',
+          end: wordAnimationEnd,
+          scrub: true,
+        },
       }
     );
+    if (opacityTween.scrollTrigger) triggers.push(opacityTween.scrollTrigger);
 
     if (enableBlur) {
-      gsap.fromTo(
+      const blurTween = gsap.fromTo(
         wordElements,
         { filter: `blur(${blurStrength}px)` },
         {
           ease: 'none',
           filter: 'blur(0px)',
           stagger: 0.05,
-          scrollTrigger: { trigger: el, scroller, start: 'top bottom-=20%', end: wordAnimationEnd, scrub: true },
+          scrollTrigger: {
+            trigger: el,
+            scroller,
+            start: 'top bottom-=20%',
+            end: wordAnimationEnd,
+            scrub: true,
+          },
         }
       );
+      if (blurTween.scrollTrigger) triggers.push(blurTween.scrollTrigger);
     }
 
     return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // Only kill triggers created by this instance
+      triggers.forEach((t) => t.kill());
     };
   }, [scrollContainerRef, enableBlur, baseRotation, baseOpacity, rotationEnd, wordAnimationEnd, blurStrength]);
 

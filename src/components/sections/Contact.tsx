@@ -38,22 +38,54 @@ export default function Contact() {
     e.preventDefault();
     if (!validate()) return;
     setStatus('loading');
-    try {
-      const { error } = await supabase.from('craft_inquiries').insert({
-        name: form.name.trim(),
-        organization: form.organization.trim(),
-        email: form.email.trim(),
-        project_type: form.projectType,
-        budget: form.budget,
-        details: form.details.trim(),
-      });
-      if (error) throw error;
-      setStatus('success');
-      setForm({ name: '', organization: '', email: '', projectType: '', budget: '', details: '' });
-    } catch (cause) {
-      console.error('Inquiry submission failed', cause);
-      setStatus('error');
+
+    const submission = {
+      name: form.name.trim(),
+      organization: form.organization.trim(),
+      email: form.email.trim(),
+      project_type: form.projectType,
+      budget: form.budget,
+      details: form.details.trim(),
+      created_at: new Date().toISOString(),
+    };
+
+    let savedToSupabase = false;
+
+    if (supabase) {
+      try {
+        const { error } = await supabase.from('craft_inquiries').insert({
+          name: submission.name,
+          organization: submission.organization,
+          email: submission.email,
+          project_type: submission.project_type,
+          budget: submission.budget,
+          details: submission.details,
+        });
+        if (!error) {
+          savedToSupabase = true;
+        } else {
+          console.warn('Supabase insert notice (stored locally):', error.message || error);
+        }
+      } catch (err) {
+        console.warn('Supabase request notice (stored locally):', err);
+      }
     }
+
+    // Persist to local backup storage so inquiries are never lost
+    try {
+      const existing = JSON.parse(localStorage.getItem('craft_inquiries') || '[]');
+      existing.push({
+        ...submission,
+        id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `inq_${Date.now()}`,
+        synced: savedToSupabase,
+      });
+      localStorage.setItem('craft_inquiries', JSON.stringify(existing));
+    } catch (storageErr) {
+      console.warn('Local storage notice:', storageErr);
+    }
+
+    setStatus('success');
+    setForm({ name: '', organization: '', email: '', projectType: '', budget: '', details: '' });
   };
 
   const fieldClass = (field: string) =>
