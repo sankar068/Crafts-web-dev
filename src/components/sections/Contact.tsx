@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useReveal } from '@/lib/useReveal';
+import StrokeText from '@/components/StrokeText';
 import { ArrowRight, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
@@ -101,9 +102,24 @@ export default function Contact() {
             <span className="text-xs uppercase tracking-[0.2em] text-cobalt-soft font-medium">
               Contact
             </span>
-            <h2 className="mt-6 font-display text-[clamp(2.2rem,5.5vw,4.5rem)] font-bold leading-[1.02] tracking-tighter text-bone">
-              Let's make<br />it real.
-            </h2>
+            <div className="mt-6">
+              <StrokeText
+                text="Let's make it real."
+                strokeColor="#8b7cff"
+                fillColor="#f1f0ec"
+                strokeWidth={1.8}
+                drawDuration={2}
+                fillDelay={0.3}
+                stagger={0.08}
+                ease="power2.out"
+                trigger="scroll"
+                fillMode="wipe"
+                fontSize={72}
+                fontWeight={700}
+                letterSpacing={-2}
+                className="font-display"
+              />
+            </div>
             <p className="mt-6 text-lg text-bone-dim leading-relaxed max-w-md">
               Tell us what you're building. We'll get back to you with thoughts on how to make it
               unforgettable.
